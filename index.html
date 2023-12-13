@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #timer {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+
+        .custom-screen {
+            display: none;
+        }
+
+        .workout-option {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: inline-block;
+            position: relative;
+        }
+
+        .tooltip {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .workout-option:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .category {
+            margin-top: 20px;
+        }
+
+        #custom-timer {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+    </style>
+    <title>Project FIT</title>
+</head>
+<body>
+
+<div class="container">
+    <h1>Project FIT</h1>
+    <button onclick="showCustomScreen()">Custom Workout</button>
+    <div id="timer"></div>
+    <button onclick="startWorkout(30)">30 minutes</button>
+    <button onclick="startWorkout(40)">40 minutes</button>
+    <button onclick="startWorkout(50)">50 minutes</button>
+    <button onclick="startWorkout(60)">1 hour</button>
+
+    <div class="custom-screen" id="customScreen">
+        <h2>Select Custom Workout</h2>
+
+        <div class="category">
+            <h3>Body Workouts</h3>
+            <div class="workout-option" onclick="addToCustomWorkout('Plank')">Plank
+                <div class="tooltip">
+                    <p>Hold a plank position with your body in a straight line from head to heels.</p>
+                </div>
+            </div>
+            <div class="workout-option" onclick="addToCustomWorkout('Forward Lunge')">Forward Lunge
+                <div class="tooltip">
+                    <p>Step forward with one leg, lowering your hips until both knees are bent at a 90-degree angle.</p>
+                </div>
+            </div>
+            <div class="workout-option" onclick="addToCustomWorkout('Single Leg Deadlift')">Single Leg Deadlift
+                <div class="tooltip">
+                    <p>Hinge at your hips, lowering your torso while lifting one leg straight behind you.</p>
+                </div>
+            </div>
+            <div class="workout-option" onclick="addToCustomWorkout('Side Plank')">Side Plank
+                <div class="tooltip">
+                    <p>Support your body on one elbow and the side of one foot, keeping your body in a straight line.</p>
+                </div>
+            </div>
+            <div class="workout-option" onclick="addToCustomWorkout('Leg Lifts')">Leg Lifts
+                <div class="tooltip">
+                    <p>Lie on your back and lift your legs upward, engaging your core muscles.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="category">
+            <h3>Cardio Workouts</h3>
+            <div class="workout-option" onclick="addToCustomWorkout('Jumping Jacks')">Jumping Jacks
+                <div class="tooltip">
+                    <p>Jump while spreading your legs and bringing your arms above your head.</p>
+                </div>
+            </div>
+            <div class="workout-option" onclick="addToCustomWorkout('Mountain Climbers')">Mountain Climbers
+                <div class="tooltip">
+                    <p>Start in a plank position and bring your knees toward your chest alternately.</p>
+                </div>
+            </div>
+            <div class="workout-option" onclick="addToCustomWorkout('Burpees')">Burpees
+                <div class="tooltip">
+                    <p>Begin in a standing position, drop into a squat position, kick your feet back, do a push-up, jump your feet back, and then explosively jump up from the squat position.</p>
+                </div>
+            </div>
+            <div class="workout-option" onclick="addToCustomWorkout('Jump Squats')">Jump Squats
+                <div class="tooltip">
+                    <p>Perform a squat and then explode off the ground, reaching for the sky.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="category">
+            <h3>Strength Workouts</h3>
+            <div class="workout-option" onclick="addToCustomWorkout('Push-ups')">Push-ups
+                <div class="tooltip">
+                    <p>Lower and raise your body by bending and straightening your arms.</p>
+                </div>
+            </div>
+            <div class="workout-option" onclick="addToCustomWorkout('Bicep Curls')">Bicep Curls
+                <div class="tooltip">
+                    <p>Hold dumbbells and curl them toward your shoulders, engaging your biceps.</p>
+                </div>
+            </div>
+            <div class="workout-option" onclick="addToCustomWorkout('Tricep Dips')">Tricep Dips
+                <div class="tooltip">
+                    <p>Use a bench or chair to dip down and engage your triceps.</p>
+                </div>
+            </div>
+            <div class="workout-option" onclick="addToCustomWorkout('Shoulder Press')">Shoulder Press
+                <div class="tooltip">
+                    <p>Press dumbbells overhead, engaging your shoulder muscles.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="custom-timer"></div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+    let workoutTimer;
+    let customWorkoutTimer;
+    let customWorkouts = [];
+
+    function startWorkout(duration) {
+        clearInterval(workoutTimer);
+        hideCustomScreen();
+        let timerElement = $("#timer");
+        let seconds = duration * 60;
+
+        function updateTimer() {
+            let minutes = Math.floor(seconds / 60);
+            let remainingSeconds = seconds % 60;
+
+            timerElement.text(`${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`);
+
+            if (seconds <= 0) {
+                clearInterval(workoutTimer);
+                timerElement.text("Workout complete!");
+                // You can implement logic to show the next workout or reset the timer
+            } else {
+                seconds--;
+            }
+        }
+
+        updateTimer();
+        workoutTimer = setInterval(updateTimer, 1000);
+    }
+
+    function showCustomScreen() {
+        $(".custom-screen").show();
+    }
+
+    function hideCustomScreen() {
+        $(".custom-screen").hide();
+        // Clear the custom workouts when hiding the custom screen
+        customWorkouts = [];
+        $("#custom-timer").text("");
+    }
+
+    function addToCustomWorkout(workout) {
+        customWorkouts.push(workout);
+        // Display the selected workouts
+        $("#custom-timer").text(`Selected Workouts: ${customWorkouts.join(', ')}`);
+    }
+
+    function startCustomWorkout() {
+        hideCustomScreen();
+        clearInterval(customWorkoutTimer);
+
+        // Randomize the order of workouts within each category
+        let shuffledWorkouts = shuffleCategories(customWorkouts);
+
+        let customTimerElement = $("#custom-timer");
+        let customSeconds = 60 * shuffledWorkouts.length;
+        let currentWorkoutIndex = 0;
+
+        function updateCustomTimer() {
+            let customMinutes = Math.floor(customSeconds / 60);
+            let customRemainingSeconds = customSeconds % 60;
+
+            customTimerElement.text(`${customMinutes}:${customRemainingSeconds < 10 ? '0' : ''}${customRemainingSeconds}`);
+
+            if (customSeconds <= 0) {
+                clearInterval(customWorkoutTimer);
+                customTimerElement.text("Custom Workout complete!");
+                // You can implement logic to show the next workout or reset the timer
+            } else {
+                customSeconds--;
+                if (customSeconds % 60 === 0) {
+                    // Display the next workout at the start of each minute
+                    $("#custom-timer").text(`Next: ${shuffledWorkouts[currentWorkoutIndex]}`);
+                    currentWorkoutIndex++;
+                }
+            }
+        }
+
+        updateCustomTimer();
+        customWorkoutTimer = setInterval(updateCustomTimer, 1000);
+    }
+
+    // Function to shuffle array elements
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    // Function to shuffle categories and workouts within each category
+    function shuffleCategories(customWorkouts) {
+        let shuffledCategories = shuffleArray(customWorkouts);
+        let shuffledWorkouts = [];
+
+        for (let category of shuffledCategories) {
+            let categoryWorkouts = customWorkouts[category];
+            if (categoryWorkouts && categoryWorkouts.length > 0) {
+                categoryWorkouts = shuffleArray(categoryWorkouts);
+                shuffledWorkouts = shuffledWorkouts.concat(categoryWorkouts);
+            }
+        }
+
+        return shuffledWorkouts;
+    }
+</script>
+
+</body>
+</html>
