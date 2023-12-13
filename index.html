@@ -46,6 +46,10 @@
             position: relative;
         }
 
+        .selected {
+            background-color: #8aff8a; /* Light green */
+        }
+
         .tooltip {
             visibility: hidden;
             width: 200px;
@@ -75,6 +79,14 @@
         #custom-timer {
             font-size: 24px;
             margin: 20px 0;
+        }
+
+        #custom-duration {
+            margin-top: 10px;
+        }
+
+        #start-custom {
+            margin-top: 10px;
         }
     </style>
     <title>Project FIT</title>
@@ -171,6 +183,11 @@
         </div>
 
         <div id="custom-timer"></div>
+        <div id="custom-duration">
+            <label for="timerInput">TIMER:</label>
+            <input type="number" id="timerInput" min="1" max="60" placeholder="Enter minutes (1-60)">
+        </div>
+        <button id="start-custom" onclick="startCustomWorkout()">START</button>
     </div>
 </div>
 
@@ -179,6 +196,7 @@
     let workoutTimer;
     let customWorkoutTimer;
     let customWorkouts = [];
+    let customDuration = 0;
 
     function startWorkout(duration) {
         clearInterval(workoutTimer);
@@ -211,26 +229,43 @@
 
     function hideCustomScreen() {
         $(".custom-screen").hide();
-        // Clear the custom workouts when hiding the custom screen
+        // Clear the custom workouts and duration when hiding the custom screen
         customWorkouts = [];
+        customDuration = 0;
         $("#custom-timer").text("");
+        $("#timerInput").val("");
+        $(".workout-option").removeClass("selected");
     }
 
     function addToCustomWorkout(workout) {
-        customWorkouts.push(workout);
-        // Display the selected workouts
-        $("#custom-timer").text(`Selected Workouts: ${customWorkouts.join(', ')}`);
+        if (customWorkouts.includes(workout)) {
+            // Deselect if already selected
+            customWorkouts = customWorkouts.filter(item => item !== workout);
+            $(`.workout-option:contains('${workout}')`).removeClass("selected");
+        } else {
+            customWorkouts.push(workout);
+            // Select workout and turn it green
+            $(`.workout-option:contains('${workout}')`).addClass("selected");
+        }
     }
 
     function startCustomWorkout() {
         hideCustomScreen();
         clearInterval(customWorkoutTimer);
 
+        // Get custom duration from input
+        customDuration = parseInt($("#timerInput").val());
+
+        if (isNaN(customDuration) || customDuration < 1 || customDuration > 60) {
+            alert("Please enter a valid duration between 1 and 60 minutes.");
+            return;
+        }
+
         // Randomize the order of workouts within each category
         let shuffledWorkouts = shuffleCategories(customWorkouts);
 
         let customTimerElement = $("#custom-timer");
-        let customSeconds = 60 * shuffledWorkouts.length;
+        let customSeconds = 60 * customDuration;
         let currentWorkoutIndex = 0;
 
         function updateCustomTimer() {
